@@ -544,7 +544,9 @@ class ForestRegressor(six.with_metaclass(ABCMeta, BaseForest, RegressorMixin)):
             random_state=random_state,
             verbose=verbose)
 
-    def predict(self, X):
+# hacked up to add with_std.  thanks to https://github.com/jmetzen
+# see also https://github.com/scikit-learn/scikit-learn/pull/3645/files
+    def predict(self, X, with_std=False):
         """Predict regression target for X.
 
         The predicted regression target of an input sample is computed as the
@@ -575,9 +577,15 @@ class ForestRegressor(six.with_metaclass(ABCMeta, BaseForest, RegressorMixin)):
             for i in range(n_jobs))
 
         # Reduce
-        y_hat = sum(all_y_hat) / len(self.estimators_)
+#        y_hat = sum(all_y_hat) / len(self.estimators_)
+#        return y_hat
 
-        return y_hat
+        y_mean = np.mean(all_y_hat, axis=0)
+        if with_std:
+            return y_mean, np.std(all_y_hat, axis=0)
+        else:
+            return y_mean
+
 
     def _set_oob_score(self, X, y):
         n_samples = y.shape[0]

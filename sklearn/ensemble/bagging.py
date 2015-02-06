@@ -787,7 +787,7 @@ class BaggingRegressor(BaseBagging, RegressorMixin):
             random_state=random_state,
             verbose=verbose)
 
-    def predict(self, X):
+    def predict(self, X, with_std=False):
         """Predict regression target for X.
 
         The predicted regression target of an input sample is computed as the
@@ -818,9 +818,17 @@ class BaggingRegressor(BaseBagging, RegressorMixin):
             for i in range(n_jobs))
 
         # Reduce
-        y_hat = sum(all_y_hat) / self.n_estimators
+#        y_hat = sum(all_y_hat) / self.n_estimators
+#
+#        return y_hat
 
-        return y_hat
+        all_y_hat = np.array(all_y_hat).reshape(self.n_estimators, -1)
+        y_mean = np.mean(all_y_hat, axis=0)
+        if with_std:
+            return y_mean, np.std(all_y_hat, axis=0)
+        else:
+            return y_mean
+
 
     def _validate_estimator(self):
         """Check the estimator and set the base_estimator_ attribute."""
