@@ -583,12 +583,14 @@ class ForestRegressor(six.with_metaclass(ABCMeta, BaseForest, RegressorMixin)):
 
         y_mean = np.mean(all_y_hat, axis=0)
 
-        print "Hi Dave! In forest predict. len=%i orig:" % len(self.estimators_)
+        print "Hi Dave! HIIIIIIIIIIIIIIIII In forest predict. len=%i orig:" % len(self.estimators_)
         print y_hat
         print "NOW:"
         print y_mean
-        print "OTHER"
-        print np.mean(all_y_hat, axis=1)
+        print "BIG:"
+        print all_y_hat
+#        print "OTHER"
+#        print np.mean(all_y_hat, axis=1)
 
         if with_std:
             return y_mean, np.std(all_y_hat, axis=0)
