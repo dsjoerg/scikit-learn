@@ -825,7 +825,10 @@ class BaggingRegressor(BaseBagging, RegressorMixin):
         all_y_hat = np.array(all_y_hat).reshape(self.n_estimators, -1)
         y_mean = np.mean(all_y_hat, axis=0)
         
-        print "Hi Dave! In bagging predict. orig %f now %f" % (y_hat, y_mean)
+        print "Hi Dave! In bagging predict. orig:"
+        print y_hat
+        print "NOW:"
+        print y_mean
 
         if with_std:
             return y_mean, np.std(all_y_hat, axis=0)
