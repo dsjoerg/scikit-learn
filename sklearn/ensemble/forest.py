@@ -577,10 +577,13 @@ class ForestRegressor(six.with_metaclass(ABCMeta, BaseForest, RegressorMixin)):
             for i in range(n_jobs))
 
         # Reduce
-#        y_hat = sum(all_y_hat) / len(self.estimators_)
+        y_hat = sum(all_y_hat) / len(self.estimators_)
 #        return y_hat
 
+
         y_mean = np.mean(all_y_hat, axis=0)
+
+        print "Hi Dave! In forest predict. orig %f now %f" % (y_hat, y_mean)
         if with_std:
             return y_mean, np.std(all_y_hat, axis=0)
         else:
