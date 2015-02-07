@@ -137,7 +137,8 @@ def _parallel_predict_proba(trees, X, n_classes, n_outputs):
 
 def _parallel_predict_regression(trees, X):
     """Private function used to compute a batch of predictions within a job."""
-    return sum(tree.predict(X) for tree in trees)
+    predictions = [tree.predict(X) for tree in trees]
+    return (sum(predictions), sum(np.square(predictions)))
 
 
 def _parallel_apply(tree, X):
@@ -570,32 +571,25 @@ class ForestRegressor(six.with_metaclass(ABCMeta, BaseForest, RegressorMixin)):
         n_jobs, n_trees, starts = _partition_estimators(self)
 
         # Parallel loop
-        all_y_hat = Parallel(n_jobs=n_jobs, verbose=self.verbose,
+        all_things = Parallel(n_jobs=n_jobs, verbose=self.verbose,
                              backend="threading")(
             delayed(_parallel_predict_regression)(
                 self.estimators_[starts[i]:starts[i + 1]], X)
             for i in range(n_jobs))
 
+        all_y_hat = [thing[0] for thing in all_things]
+        all_y_sqs = [thing[1] for thing in all_things]
+
         # Reduce
         y_hat = sum(all_y_hat) / len(self.estimators_)
-#        return y_hat
-
-
-        y_mean = np.mean(all_y_hat, axis=0)
-
-        print "Hi Dave! HIIIIIIIIIIIIIIIII In forest predict. len=%i orig:" % len(self.estimators_)
-        print y_hat
-        print "NOW:"
-        print y_mean
-        print "BIG:"
-        print all_y_hat
-#        print "OTHER"
-#        print np.mean(all_y_hat, axis=1)
+        y_avg_sqs = sum(all_y_sqs) / len(self.estimators_)
+        y_vars = y_avg_sqs - np.square(y_hat)
+        y_stds = np.sqrt(y_vars)
 
         if with_std:
-            return y_mean, np.std(all_y_hat, axis=0)
+            return y_hat, y_stds
         else:
-            return y_mean
+            return y_hat
 
 
     def _set_oob_score(self, X, y):
